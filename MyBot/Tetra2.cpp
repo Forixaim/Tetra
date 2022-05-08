@@ -16,7 +16,6 @@ int main()
     std::cin >> Password;
     std::unique_ptr<BotInfo> const Tetra(new BotInfo(Password));
     std::unique_ptr<PlayerData> const TetraPlayerDatabase(new PlayerData());
-    xlsxiowriter PlayerDataWriter = TetraPlayerDatabase->GetWriter();
     
     /* Create bot cluster */
     cluster bot(Tetra->GetToken());
@@ -31,7 +30,7 @@ int main()
     });
 
     /* Register slash command here in on_ready */
-    bot.on_ready([&bot, &TetraPlayerDatabase, &PlayerDataWriter](const dpp::ready_t& event) 
+    bot.on_ready([&bot, &TetraPlayerDatabase](const dpp::ready_t& event) 
     {
         /* Wrap command registration in run_once to make sure it doesn't run on every full reconnection */
         if (dpp::run_once<struct register_bot_commands>()) 
