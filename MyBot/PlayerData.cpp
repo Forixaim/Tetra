@@ -65,5 +65,6 @@ auto PlayerData::NewPlayer(dpp::snowflake UserID) -> void
 	UserIds.push_back(UserID);
     PlayerDataFiles.open( "PlayerBase.txt");
     PlayerDataFiles << std::to_string(ID) << std::to_string(UserID) << "\n";
+    std::cout << "Successfully Wrote to PlayerBase.txt\n";
     PlayerDataFiles.close();
 }

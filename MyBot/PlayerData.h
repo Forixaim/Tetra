@@ -1,7 +1,6 @@
 #pragma once
 #include <dpp/dpp.h>
 
-
 class PlayerData
 {
 private:
@@ -16,6 +15,6 @@ public:
 	PlayerData();
 	~PlayerData();
 	auto GetWarns(dpp::snowflake PlayerID) -> int;
-	void NewPlayer(dpp::snowflake UserID);
+	auto NewPlayer(dpp::snowflake UserID) -> void;
 };
 
