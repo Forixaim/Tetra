@@ -4,9 +4,7 @@
 class PlayerData
 {
 private:
-	std::vector<long> UniqueIds;
-	std::vector<dpp::snowflake> UserIds;
-	std::vector<short> Warns;
+	std::map<dpp::snowflake, long> Player;
 	long ID = 0;
 	std::fstream PlayerDataFiles;
 public:

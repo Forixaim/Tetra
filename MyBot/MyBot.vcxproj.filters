@@ -168,13 +168,13 @@
       <Filter>Header Files\Personal Headers</Filter>
     </ClInclude>
     <ClInclude Include="BotInfo.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Personal Headers</Filter>
     </ClInclude>
     <ClInclude Include="EssentialTemplates.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Personal Headers</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Personal Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
