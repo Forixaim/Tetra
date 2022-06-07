@@ -17,9 +17,12 @@
 #include <aws/s3/model/Bucket.h>
 #include <aws/s3/model/Object.h>
 #include <aws/s3/S3Client.h>
+#include <aws/s3/model/PutObjectRequest.h>
 #include <aws/s3/S3Request.h>
 //Modules
-
+#include <fstream>
+#include <regex>
 //Other Headers
 #include "BotInfo.h"
-#include "EssentialTemplates.h"
+#include "PlayerData.h"
+#include "TetraImageRecognition.h"

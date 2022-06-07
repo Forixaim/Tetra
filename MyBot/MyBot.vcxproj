@@ -184,7 +184,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BotInfo.cpp" />
-    <ClCompile Include="EssentialTemplates.cpp" />
     <ClCompile Include="PlayerData.cpp" />
     <ClCompile Include="Tetra.cpp" />
     <ClCompile Include="TetraImageRecognition.cpp" />
@@ -232,14 +231,9 @@
     <ClInclude Include="dependencies\include\dpp-10.0\dpp\webhook.h" />
     <ClInclude Include="dependencies\include\dpp-10.0\dpp\win32_safe_warnings.h" />
     <ClInclude Include="dependencies\include\dpp-10.0\dpp\wsclient.h" />
-    <ClInclude Include="EssentialTemplates.h" />
     <ClInclude Include="PlayerData.h" />
-    <ClInclude Include="resource.h" />
     <ClInclude Include="Tetra.h" />
     <ClInclude Include="TetraImageRecognition.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="Tetra.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -33,9 +33,6 @@
     <ClCompile Include="BotInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="EssentialTemplates.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TetraImageRecognition.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -173,20 +170,9 @@
     <ClInclude Include="BotInfo.h">
       <Filter>Header Files\Personal Headers</Filter>
     </ClInclude>
-    <ClInclude Include="EssentialTemplates.h">
-      <Filter>Header Files\Personal Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Header Files\Personal Headers</Filter>
-    </ClInclude>
     <ClInclude Include="TetraImageRecognition.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="Tetra.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
