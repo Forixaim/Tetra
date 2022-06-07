@@ -1,7 +1,6 @@
 #include "PlayerData.h"
 #include <fstream>
 
-
 PlayerData::PlayerData()
 {
 
