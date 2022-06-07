@@ -13,16 +13,7 @@ auto BotInfo::GetGuildId() -> dpp::snowflake
 
 BotInfo::BotInfo(std::string InputPassword)
 {
-	if (InputPassword == Password)
-	{
-		std::cout << "Authentication Success! Tetra's credentials has been assigned.\n";
-	}
-	else
-	{
-		throw "Authentication Failure, You stink";
-		exit(1);
-	}
-
+	Token = InputPassword;
 }
 
 BotInfo::~BotInfo()
