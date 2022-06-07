@@ -144,11 +144,12 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <AdditionalIncludeDirectories>C:\Users\thebe\OneDrive\Documents\excelib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <EnableModules>true</EnableModules>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>dpp.lib;ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;C:\Users\thebe\OneDrive\Documents\excelib\lib\libxlsxio_readw.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dpp.lib;ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy /y "$(ProjectDir)dependencies\64\debug\bin\*.dll" "$(OutDir)"</Command>
@@ -186,6 +187,7 @@
     <ClCompile Include="EssentialTemplates.cpp" />
     <ClCompile Include="PlayerData.cpp" />
     <ClCompile Include="Tetra.cpp" />
+    <ClCompile Include="TetraImageRecognition.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BotInfo.h" />
@@ -234,11 +236,32 @@
     <ClInclude Include="PlayerData.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Tetra.h" />
+    <ClInclude Include="TetraImageRecognition.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Tetra.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\AWSSDKCPP-Core.redist.1.6.25\build\native\AWSSDKCPP-Core.redist.targets" Condition="Exists('..\packages\AWSSDKCPP-Core.redist.1.6.25\build\native\AWSSDKCPP-Core.redist.targets')" />
+    <Import Project="..\packages\AWSSDKCPP-Core.1.6.25\build\native\AWSSDKCPP-Core.targets" Condition="Exists('..\packages\AWSSDKCPP-Core.1.6.25\build\native\AWSSDKCPP-Core.targets')" />
+    <Import Project="..\packages\AWSSDKCPP-Rekognition.redist.1.6.20160627.25\build\native\AWSSDKCPP-Rekognition.redist.targets" Condition="Exists('..\packages\AWSSDKCPP-Rekognition.redist.1.6.20160627.25\build\native\AWSSDKCPP-Rekognition.redist.targets')" />
+    <Import Project="..\packages\AWSSDKCPP-Rekognition.1.6.20160627.25\build\native\AWSSDKCPP-Rekognition.targets" Condition="Exists('..\packages\AWSSDKCPP-Rekognition.1.6.20160627.25\build\native\AWSSDKCPP-Rekognition.targets')" />
+    <Import Project="..\packages\AWSSDKCPP-S3.redist.1.6.20060301.25\build\native\AWSSDKCPP-S3.redist.targets" Condition="Exists('..\packages\AWSSDKCPP-S3.redist.1.6.20060301.25\build\native\AWSSDKCPP-S3.redist.targets')" />
+    <Import Project="..\packages\AWSSDKCPP-S3.1.6.20060301.25\build\native\AWSSDKCPP-S3.targets" Condition="Exists('..\packages\AWSSDKCPP-S3.1.6.20060301.25\build\native\AWSSDKCPP-S3.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\AWSSDKCPP-Core.redist.1.6.25\build\native\AWSSDKCPP-Core.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\AWSSDKCPP-Core.redist.1.6.25\build\native\AWSSDKCPP-Core.redist.targets'))" />
+    <Error Condition="!Exists('..\packages\AWSSDKCPP-Core.1.6.25\build\native\AWSSDKCPP-Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\AWSSDKCPP-Core.1.6.25\build\native\AWSSDKCPP-Core.targets'))" />
+    <Error Condition="!Exists('..\packages\AWSSDKCPP-Rekognition.redist.1.6.20160627.25\build\native\AWSSDKCPP-Rekognition.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\AWSSDKCPP-Rekognition.redist.1.6.20160627.25\build\native\AWSSDKCPP-Rekognition.redist.targets'))" />
+    <Error Condition="!Exists('..\packages\AWSSDKCPP-Rekognition.1.6.20160627.25\build\native\AWSSDKCPP-Rekognition.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\AWSSDKCPP-Rekognition.1.6.20160627.25\build\native\AWSSDKCPP-Rekognition.targets'))" />
+    <Error Condition="!Exists('..\packages\AWSSDKCPP-S3.redist.1.6.20060301.25\build\native\AWSSDKCPP-S3.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\AWSSDKCPP-S3.redist.1.6.20060301.25\build\native\AWSSDKCPP-S3.redist.targets'))" />
+    <Error Condition="!Exists('..\packages\AWSSDKCPP-S3.1.6.20060301.25\build\native\AWSSDKCPP-S3.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\AWSSDKCPP-S3.1.6.20060301.25\build\native\AWSSDKCPP-S3.targets'))" />
+  </Target>
 </Project>
