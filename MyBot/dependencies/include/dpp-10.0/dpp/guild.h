@@ -24,6 +24,7 @@
 #include <dpp/managed.h>
 #include <dpp/utility.h>
 #include <dpp/voicestate.h>
+#include <dpp/permissions.h>
 #include <string>
 #include <unordered_map>
 #include <dpp/json_interface.h>
@@ -129,9 +130,11 @@ enum guild_flags : uint32_t {
  */
 enum guild_flags_extra : uint8_t {
 	/** Guild has premium progress bar enabled */
-	g_premium_progress_bar_enabled =		0b00000001,
+	g_premium_progress_bar_enabled =	0b00000001,
 	/** Guild can have an animated banner (doesn't mean it actually has one though) */
 	g_animated_banner =			0b00000010,
+	/** Guild has auto moderation */
+	g_auto_moderation =			0b00000100,
 };
 
 /**
@@ -538,9 +541,9 @@ public:
 	 * before permission overwrites are applied.
 	 *
 	 * @param member member to get permissions for
-	 * @return uint64_t permissions bitmask
+	 * @return permission permissions bitmask
 	 */
-	uint64_t base_permissions(const class user* member) const;
+	permission base_permissions(const class user* member) const;
 
 	/**
 	 * @brief Get the permission overwrites for a member
@@ -550,9 +553,9 @@ public:
 	 * from channel::base_permissions
 	 * @param member Member to fetch permissions for
 	 * @param channel Channel to fetch permissions against
-	 * @return uint64_t Merged permissions bitmask of overwrites.
+	 * @return permission Merged permissions bitmask of overwrites.
 	 */
-	uint64_t permission_overwrites(const uint64_t base_permissions, const user*  member, const channel* channel) const;
+	permission permission_overwrites(const uint64_t base_permissions, const user*  member, const channel* channel) const;
 
 	/**
 	 * @brief Rehash members map
@@ -693,6 +696,12 @@ public:
 	 * @return bool can have animated banner image
 	 */
 	bool has_animated_banner() const;
+
+	/**
+	 * @brief Guild has auto moderation features
+	 * @return bool has auto moderation features
+	 */
+	bool has_auto_moderation() const;
 
 	/**
 	 * @brief Guild has access to set an animated guild icon

@@ -293,7 +293,7 @@ typedef std::function<void(const confirmation_callback_t&)> command_completion_e
  */
 typedef std::function<void(json&, const http_request_completion_t&)> json_encode_t;
 
-extern DPP_EXPORT event_handle __next_handle;
+extern DPP_EXPORT event_handle _next_handle;
 
 /**
  * @brief Handles routing of an event to multiple listeners.
@@ -442,7 +442,7 @@ public:
 	 */
 	event_handle attach(std::function<void(const T&)> func) {
 		std::unique_lock l(lock);
-		event_handle h = __next_handle++;
+		event_handle h = _next_handle++;
 		dispatch_container.emplace(h, func);
 		return h;		
 	}
@@ -825,9 +825,21 @@ public:
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type interaction_create_t&, and returns void.
+	 *
+	 * @note There are dedicated events to handle slashcommands (See dpp::cluster::on_slashcommand),
+	 * user context menus (See dpp::cluster::on_user_context_menu) and message context menus (See dpp::cluster::on_message_context_menu)
 	 */
 	event_router_t<interaction_create_t> on_interaction_create;
 
+	/**
+	 * @brief Called when a slash command is issued.
+	 * Only dpp::ctxm_chat_input types of interaction are routed to this event.
+	 * For an example of this in action please see \ref slashcommands
+	 *
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type interaction_create_t&, and returns void.
+	 */
+	event_router_t<slashcommand_t> on_slashcommand;
 	
 	/**
 	 * @brief Called when a button is clicked attached to a message.
@@ -862,7 +874,7 @@ public:
 
 	/**
 	 * @brief Called when a user right-clicks or long-presses on a message,
-	 * where a slash command is bound to the ctxm_message command type.
+	 * where a slash command is bound to the dpp::ctxm_message command type.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type select_click_t&, and returns void.
@@ -871,7 +883,7 @@ public:
 
 	/**
 	 * @brief Called when a user right-clicks or long-presses on a user,
-	 * where a slash command is bound to the ctxm_user command type.
+	 * where a slash command is bound to the dpp::ctxm_user command type.
 	 *
 	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
 	 * The function signature for this event takes a single `const` reference of type select_click_t&, and returns void.
@@ -1428,6 +1440,15 @@ public:
 	 */
 	event_router_t<voice_receive_t> on_voice_receive;
 
+	/**
+	 * @brief Called when new audio data is received, combined and mixed for all speaking users.
+	 * 
+	 * @note Receiving audio for bots is not officially supported by discord.
+	 * 
+	 * @note Use operator() to attach a lambda to this event, and the detach method to detach the listener using the returned ID.
+	 * The function signature for this event takes a single `const` reference of type voice_receive_t&, and returns void.
+	 */
+	event_router_t<voice_receive_t> on_voice_receive_combined;
 	
 	/**
 	 * @brief Called when sending of audio passes over a track marker.
@@ -1585,9 +1606,6 @@ public:
 	/**
 	 * @brief Create a global slash command (a bot can have a maximum of 100 of these).
 	 * 
-	 * @note Global commands are cached by discord server-side and can take up to an hour to be visible. For testing,
-	 * you should use cluster::guild_command_create instead.
-	 *
 	 * @see https://discord.com/developers/docs/interactions/application-commands#create-global-application-command
 	 * @param s Slash command to create
 	 * @param callback Function to call when the API call completes.
@@ -1645,9 +1663,6 @@ public:
 	 * @brief Create/overwrite global slash commands.
 	 * Any existing global slash commands will be deleted and replaced with these.
 	 *
-	 * @note Global commands are cached by discord server-side and can take up to an hour to be visible. For testing,
-	 * you should use cluster::guild_bulk_command_create instead.
-	 * 
 	 * @see https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-global-application-commands
 	 * @param commands Vector of slash commands to create/update.
 	 * overwriting existing commands that are registered globally for this application. Updates will be available in all guilds after 1 hour.
@@ -1661,8 +1676,6 @@ public:
 	 * @brief Edit a global slash command (a bot can have a maximum of 100 of these)
 	 *
 	 * @see https://discord.com/developers/docs/interactions/application-commands#edit-global-application-command
-	 * @note Global commands are cached by discord server-side and can take up to an hour to be visible. For testing,
-	 * you should use cluster::guild_bulk_command_create instead.
 	 * @param s Slash command to change
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
@@ -1726,6 +1739,7 @@ public:
 	 * @param guild_id Guild ID to edit permissions of the slash commands in
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::guild_command_permissions_map object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * @deprecated This has been disabled with updates to Permissions v2. You can use guild_command_edit_permissions instead
 	 */
 	void guild_bulk_command_edit_permissions(const std::vector<slashcommand> &commands, snowflake guild_id, command_completion_event_t callback = utility::log_error());
 
@@ -2089,13 +2103,13 @@ public:
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param c Channel to set permissions for
 	 * @param overwrite_id Overwrite to change (a user or role ID)
-	 * @param allow allow permissions
-	 * @param deny deny permissions
+	 * @param allow allow permissions bitmask
+	 * @param deny deny permissions bitmask
 	 * @param member true if the overwrite_id is a user id, false if it is a channel id
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_edit_permissions(const class channel &c, const snowflake overwrite_id, const uint32_t allow, const uint32_t deny, const bool member, command_completion_event_t callback = utility::log_error());
+	void channel_edit_permissions(const class channel &c, const snowflake overwrite_id, const uint64_t allow, const uint64_t deny, const bool member, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit a channel's permissions
@@ -2104,13 +2118,13 @@ public:
 	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
 	 * @param channel_id ID of the channel to set permissions for
 	 * @param overwrite_id Overwrite to change (a user or role ID)
-	 * @param allow allow permissions
-	 * @param deny deny permissions
+	 * @param allow allow permissions bitmask
+	 * @param deny deny permissions bitmask
 	 * @param member true if the overwrite_id is a user id, false if it is a channel id
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void channel_edit_permissions(const snowflake channel_id, const snowflake overwrite_id, const uint32_t allow, const uint32_t deny, const bool member, command_completion_event_t callback = utility::log_error());
+	void channel_edit_permissions(const snowflake channel_id, const snowflake overwrite_id, const uint64_t allow, const uint64_t deny, const bool member, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete a channel
@@ -2408,8 +2422,24 @@ public:
 	 * @param role_id Role to remove
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 * @deprecated Use dpp::cluster::guild_member_remove_role instead
 	 */
 	void guild_member_delete_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback = utility::log_error());
+
+	/**
+	 * @brief Remove role from guild member
+	 *
+	 * Removes a role from a guild member. Requires the `MANAGE_ROLES` permission.
+	 * Fires a `Guild Member Update` Gateway event.
+	 * @see https://discord.com/developers/docs/resources/guild#remove-guild-member-role
+	 * @note This method supports audit log reasons set by the cluster::set_audit_reason() method.
+	 * @param guild_id Guild ID to remove role from user on
+	 * @param user_id User ID to remove role from
+	 * @param role_id Role to remove
+	 * @param callback Function to call when the API call completes.
+	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
+	 */
+	void guild_member_remove_role(snowflake guild_id, snowflake user_id, snowflake role_id, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Remove (kick) a guild member
@@ -2946,10 +2976,12 @@ public:
 	 *
 	 * @see https://discord.com/developers/docs/resources/webhook#get-webhook-message
 	 * @param wh Webhook to get the original message for
+	 * @param message_id The message ID
+	 * @param thread_id ID of the thread the message is in
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void get_webhook_message(const class webhook &wh, command_completion_event_t callback = utility::log_error());
+	void get_webhook_message(const class webhook &wh, snowflake message_id, snowflake thread_id = 0, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Edit webhook message
@@ -2963,10 +2995,11 @@ public:
 	 * @note the attachments array must contain all attachments that should be present after edit, including retained and new attachments provided in the request body.
 	 * @param wh Webhook to edit message for
 	 * @param m New message
+	 * @param thread_id ID of the thread the message is in
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::message object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void edit_webhook_message(const class webhook &wh, const struct message &m, command_completion_event_t callback = utility::log_error());
+	void edit_webhook_message(const class webhook &wh, const struct message &m, snowflake thread_id = 0, command_completion_event_t callback = utility::log_error());
 
 	/**
 	 * @brief Delete webhook message
@@ -2974,10 +3007,12 @@ public:
 	 * @see https://discord.com/developers/docs/resources/webhook#delete-webhook-message
 	 * @param wh Webhook to delete message for
 	 * @param message_id Message ID to delete
+	 * @param thread_id ID of the thread the message is in
 	 * @param callback Function to call when the API call completes.
 	 * On success the callback will contain a dpp::confirmation object in confirmation_callback_t::value. On failure, the value is undefined and confirmation_callback_t::is_error() method will return true. You can obtain full error details with confirmation_callback_t::get_error().
 	 */
-	void delete_webhook_message(const class webhook &wh, snowflake message_id, command_completion_event_t callback = utility::log_error());
+	void delete_webhook_message(const class webhook &wh, snowflake message_id, snowflake thread_id = 0, command_completion_event_t callback = utility::log_error());
+
 
 	/**
 	 * @brief Get a role for a guild
