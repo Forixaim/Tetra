@@ -19,16 +19,28 @@ int main()
 	bot.on_log(dpp::utility::cout_logger());
 
 	/* Handle slash command */
-	
+	bot.on_slashcommand([&bot](const dpp::slashcommand_t& event)
+	{
+		if (event.command.get_command_name() == "speak") 
+		{
+			std::string Msg = std::get<std::string>(event.get_parameter("msg"));
+			dpp::message myMessage;
+			myMessage.content = Msg;
+			myMessage.channel_id = event.command.channel_id;
+			bot.message_create(myMessage);
+			event.cancel_event();
+		}
+	});
 	/* Register slash command here in on_ready */
 	bot.on_ready([&bot, &TetraPlayerDatabase](const dpp::ready_t& event) 
 	{
 		/* Wrap command registration in run_once to make sure it doesn't run on every full reconnection */
 		if (dpp::run_once<struct register_bot_commands>()) 
 		{
-			dpp::slashcommand Say("Say", "Say Something", bot.me.id);
-			Say.add_option(dpp::command_option(dpp::co_string, "Message", "Message to Send"));
+			dpp::slashcommand speak("speak", "say something", bot.me.id);
+			speak.add_option(dpp::command_option(dpp::co_string, "msg", "msg to send", true));
 
+			bot.global_command_create(speak);
 		}
 		if (dpp::run_once<struct RegisterFounder>())
 		{
@@ -37,33 +49,40 @@ int main()
 	});
 	bot.on_message_create([&bot, &ImageRecognition](const dpp::message_create_t &event)
 	{
-		std::cout << "Message Event Got!" << std::endl;
-		if (!event.msg.attachments.empty())
+		if (event.msg.author.is_bot())
 		{
-			std::cout << "No Attachments Found!" << std::endl;
+			std::cout << "Bot detected ignoring";
 		}
-		if (event.msg.attachments.size() > 3)
+		else
 		{
-			dpp::guild_member target = dpp::find_guild_member(event.msg.guild_id, event.msg.author.id);
-			auto adminrole = [](int i)
+			std::cout << "Message Event Got!" << std::endl;
+			if (!event.msg.attachments.empty())
 			{
-				return i = 820863249834442754;
-			};
-			auto admin = std::find_if(target.roles.begin(), target.roles.end(), adminrole);
-			if (admin != target.roles.end())
-			{
-				std::cout << "Sorry admins for ruining your day.\n";
+				std::cout << "No Attachments Found!" << std::endl;
 			}
-			else
+			if (event.msg.attachments.size() > 3)
 			{
-				event.reply("Your message was automatically deleted due to posting more than 3 attachments.", true);
+				dpp::guild_member target = dpp::find_guild_member(event.msg.guild_id, event.msg.author.id);
+				auto adminrole = [](int i)
+				{
+					return i = 820863249834442754;
+				};
+				auto admin = std::find_if(target.roles.begin(), target.roles.end(), adminrole);
+				if (admin != target.roles.end())
+				{
+					std::cout << "Sorry admins for ruining your day.\n";
+				}
+				else
+				{
+					event.reply("Your message was automatically deleted due to posting more than 3 attachments.", true);
+					bot.message_delete(event.msg.id, event.msg.channel_id);
+				}
+			}
+			if (!ImageRecognition->RecognizeBadWords(event.msg.content))
+			{
+				event.reply("Your message was automatically deleted due to inappropriate language.", true);
 				bot.message_delete(event.msg.id, event.msg.channel_id);
 			}
-		}
-		if (!ImageRecognition->RecognizeBadWords(event.msg.content)) 
-		{
-			event.reply("Your message was automatically deleted due to inappropriate language.", true);
-			bot.message_delete(event.msg.id, event.msg.channel_id);
 		}
 	});
 	bot.on_guild_member_add([&bot, &TetraPlayerDatabase](const dpp::guild_member_add_t& event)
